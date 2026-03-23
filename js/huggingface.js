@@ -4,7 +4,11 @@
  */
 
 const HuggingFace = (() => {
-  const BASE_URL = 'https://api-inference.huggingface.co/models';
+  // Use HuggingFace's modern inference router which returns proper
+  // Access-Control-Allow-Origin headers, allowing direct browser requests
+  // without a proxy server.  The request/response format is identical to
+  // the legacy api-inference.huggingface.co endpoint.
+  const BASE_URL = 'https://router.huggingface.co/hf-inference/models';
 
   /**
    * Generate an image from a text prompt.
