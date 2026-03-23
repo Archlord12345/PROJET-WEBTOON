@@ -2,7 +2,7 @@
 
 > Créez vos webtoons directement dans votre navigateur, hébergé sur GitHub Pages.
 
-![Mascotte](assets/mascot.svg)
+![Mascotte](logo.png)
 
 **[▶ Ouvrir l'application](https://archlord12345.github.io/PROJET-WEBTOON/)**
 
