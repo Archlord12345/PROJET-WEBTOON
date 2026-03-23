@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <!-- Background circle -->
+  <circle cx="60" cy="60" r="58" fill="#1a1a24" stroke="#7c5cbf" stroke-width="4"/>
+  <!-- Body -->
+  <ellipse cx="60" cy="82" rx="26" ry="22" fill="#7c5cbf"/>
+  <!-- Head -->
+  <circle cx="60" cy="50" r="24" fill="#f5c9a0"/>
+  <!-- Eyes -->
+  <circle cx="52" cy="47" r="4" fill="#1a1a24"/>
+  <circle cx="68" cy="47" r="4" fill="#1a1a24"/>
+  <!-- Eye shine -->
+  <circle cx="53.5" cy="45.5" r="1.5" fill="#fff"/>
+  <circle cx="69.5" cy="45.5" r="1.5" fill="#fff"/>
+  <!-- Smile -->
+  <path d="M52 57 Q60 64 68 57" stroke="#1a1a24" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Ears -->
+  <ellipse cx="36" cy="46" rx="7" ry="10" fill="#f5c9a0"/>
+  <ellipse cx="84" cy="46" rx="7" ry="10" fill="#f5c9a0"/>
+  <!-- Inner ears -->
+  <ellipse cx="36" cy="46" rx="4" ry="6" fill="#e85d9e"/>
+  <ellipse cx="84" cy="46" rx="4" ry="6" fill="#e85d9e"/>
+  <!-- Pencil -->
+  <rect x="78" y="72" width="6" height="24" rx="1" fill="#f1c40f" transform="rotate(-20 81 84)"/>
+  <polygon points="81,92 85,92 83,97" fill="#c0392b" transform="rotate(-20 83 94)"/>
+  <!-- Stars -->
+  <text x="12" y="30" font-size="14" fill="#e85d9e" opacity="0.9">★</text>
+  <text x="94" y="22" font-size="10" fill="#7c5cbf" opacity="0.9">✦</text>
+  <text x="100" y="95" font-size="12" fill="#9370db" opacity="0.7">✦</text>
+</svg>
