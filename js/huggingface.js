@@ -4,10 +4,11 @@
  */
 
 const HuggingFace = (() => {
-  // Requests go through the local proxy server (/api/hf/models/…) so that
-  // the browser never contacts api-inference.huggingface.co directly and
-  // avoids the CORS preflight rejection.
-  const BASE_URL = '/api/hf/models';
+  // Use HuggingFace's modern inference router which returns proper
+  // Access-Control-Allow-Origin headers, allowing direct browser requests
+  // without a proxy server.  The request/response format is identical to
+  // the legacy api-inference.huggingface.co endpoint.
+  const BASE_URL = 'https://router.huggingface.co/hf-inference/models';
 
   /**
    * Generate an image from a text prompt.
@@ -91,7 +92,7 @@ const HuggingFace = (() => {
    */
   async function validateKey(apiKey) {
     try {
-      const res = await fetch('/api/hf/whoami-v2', {
+      const res = await fetch('https://huggingface.co/api/whoami-v2', {
         headers: { Authorization: `Bearer ${apiKey}` },
       });
       if (res.ok) {
