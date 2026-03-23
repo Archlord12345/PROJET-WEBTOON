@@ -8,6 +8,9 @@
  * et prennent la priorité sur celles définies ici.
  */
 window.APP_CONFIG = {
+  /** Nom de l'application (affiché dans l'onglet et l'en-tête) */
+  APP_NAME: 'Webtoon Maker',
+
   /** Clé API Hugging Face  ➜ https://huggingface.co/settings/tokens */
   HF_API_KEY: '',
 
