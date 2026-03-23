@@ -83,6 +83,11 @@ const State = (() => {
       const raw = localStorage.getItem('wm_settings');
       if (raw) Object.assign(_state.settings, JSON.parse(raw));
     } catch (_) { /* ignore */ }
+
+    // Apply config.js defaults for keys not yet saved in localStorage
+    const cfg = window.APP_CONFIG || {};
+    if (!_state.settings.hfApiKey       && cfg.HF_API_KEY)       _state.settings.hfApiKey       = cfg.HF_API_KEY;
+    if (!_state.settings.googleClientId && cfg.GOOGLE_CLIENT_ID) _state.settings.googleClientId = cfg.GOOGLE_CLIENT_ID;
   }
 
   return {
