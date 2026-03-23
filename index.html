@@ -173,26 +173,36 @@
         <!-- Hugging Face -->
         <section class="settings-section">
           <h3>🤗 Hugging Face</h3>
-          <label class="field-label">Clé API Hugging Face</label>
-          <div class="api-key-row">
-            <input type="password" id="hf-api-key" class="field-input"
-              placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxxx" />
-            <button id="btn-toggle-hf-key" class="btn btn-ghost btn-sm">👁</button>
+          <div id="hf-api-key-inputs">
+            <label class="field-label">Clé API Hugging Face</label>
+            <div class="api-key-row">
+              <input type="password" id="hf-api-key" class="field-input"
+                placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxxx" />
+              <button id="btn-toggle-hf-key" class="btn btn-ghost btn-sm">👁</button>
+            </div>
+            <p class="hint">Obtenez votre clé sur <a href="https://huggingface.co/settings/tokens"
+              target="_blank" rel="noopener">huggingface.co/settings/tokens</a></p>
           </div>
-          <p class="hint">Obtenez votre clé sur <a href="https://huggingface.co/settings/tokens"
-            target="_blank" rel="noopener">huggingface.co/settings/tokens</a></p>
+          <div id="hf-preconfigured" class="hidden">
+            <div class="status-badge ok">✔ Clé API configurée via config.js</div>
+          </div>
           <div id="hf-status" class="status-badge"></div>
         </section>
 
         <!-- Google Drive -->
         <section class="settings-section">
           <h3>📁 Google Drive</h3>
-          <label class="field-label">Google Client ID (OAuth2)</label>
-          <input type="text" id="google-client-id" class="field-input"
-            placeholder="xxxxxx.apps.googleusercontent.com" />
-          <p class="hint">Créez un identifiant OAuth 2.0 dans la <a
-            href="https://console.cloud.google.com/apis/credentials"
-            target="_blank" rel="noopener">Google Cloud Console</a>.</p>
+          <div id="google-client-id-inputs">
+            <label class="field-label">Google Client ID (OAuth2)</label>
+            <input type="text" id="google-client-id" class="field-input"
+              placeholder="xxxxxx.apps.googleusercontent.com" />
+            <p class="hint">Créez un identifiant OAuth 2.0 dans la <a
+              href="https://console.cloud.google.com/apis/credentials"
+              target="_blank" rel="noopener">Google Cloud Console</a>.</p>
+          </div>
+          <div id="google-preconfigured" class="hidden">
+            <div class="status-badge ok">✔ Client ID configuré via config.js</div>
+          </div>
           <button id="btn-gdrive-auth" class="btn btn-primary">🔗 Connecter Google Drive</button>
           <div id="gdrive-status" class="status-badge"></div>
         </section>
