@@ -12,8 +12,8 @@ window.APP_CONFIG = {
   APP_NAME: 'Webtoon Maker',
 
   /** Clé API Hugging Face  ➜ https://huggingface.co/settings/tokens */
-  HF_API_KEY: '',
+  HF_API_KEY: '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',
 
   /** Client ID OAuth2 Google ➜ https://console.cloud.google.com/apis/credentials */
-  GOOGLE_CLIENT_ID: '',
+  GOOGLE_CLIENT_ID: '1059573728053-bmhg67mjuaepfh3jnmvrmohntcq72kq1.apps.googleusercontent.com',
 };
