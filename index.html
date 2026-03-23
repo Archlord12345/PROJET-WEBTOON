@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Webtoon Maker</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" type="image/svg+xml" href="assets/mascot.svg" />
+  <!-- Google Identity Services (OAuth2 PKCE) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+  <!-- ════════════════════════════════════
+       HEADER / NAV
+  ════════════════════════════════════ -->
+  <header class="app-header">
+    <div class="header-brand">
+      <img src="assets/mascot.svg" alt="Mascotte Webtoon Maker" class="mascot" />
+      <span class="brand-title">Webtoon Maker</span>
+    </div>
+    <nav class="header-nav">
+      <button id="btn-new-project" class="btn btn-ghost" title="Nouveau projet">＋ Nouveau</button>
+      <button id="btn-open-project" class="btn btn-ghost" title="Ouvrir depuis Google Drive">📂 Ouvrir</button>
+      <button id="btn-save-project" class="btn btn-ghost" title="Sauvegarder sur Google Drive">💾 Sauvegarder</button>
+      <button id="btn-export" class="btn btn-primary" title="Exporter en PNG/PDF">⬇ Exporter</button>
+      <button id="btn-settings" class="btn btn-ghost icon-btn" title="Paramètres">⚙</button>
+    </nav>
+  </header>
+
+  <!-- ════════════════════════════════════
+       MAIN LAYOUT
+  ════════════════════════════════════ -->
+  <main class="app-body">
+
+    <!-- LEFT SIDEBAR — Panel list -->
+    <aside class="sidebar" id="panel-sidebar">
+      <div class="sidebar-header">
+        <span>Panneaux</span>
+        <button id="btn-add-panel" class="btn btn-sm btn-primary" title="Ajouter un panneau">＋</button>
+      </div>
+      <ul id="panel-list" class="panel-list">
+        <!-- Panels inserted dynamically -->
+      </ul>
+    </aside>
+
+    <!-- CENTER — Canvas / Preview -->
+    <section class="canvas-area" id="canvas-area">
+      <div class="canvas-toolbar">
+        <button id="btn-zoom-in"  class="btn btn-sm btn-ghost">🔍＋</button>
+        <button id="btn-zoom-out" class="btn btn-sm btn-ghost">🔍－</button>
+        <button id="btn-zoom-fit" class="btn btn-sm btn-ghost">⊡ Ajuster</button>
+        <span id="zoom-label" class="zoom-label">100 %</span>
+      </div>
+      <div class="canvas-scroll" id="canvas-scroll">
+        <div class="webtoon-canvas" id="webtoon-canvas">
+          <!-- Panel cards rendered here -->
+          <div class="canvas-placeholder" id="canvas-placeholder">
+            <img src="assets/mascot.svg" alt="" class="placeholder-mascot" />
+            <p>Cliquez sur <strong>＋ Ajouter un panneau</strong><br/>pour commencer votre webtoon !</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT SIDEBAR — Panel editor -->
+    <aside class="editor-panel" id="editor-panel">
+      <div class="editor-section" id="editor-empty">
+        <p class="muted">Sélectionnez un panneau pour l'éditer.</p>
+      </div>
+
+      <div class="editor-section hidden" id="editor-form">
+        <h3 class="editor-title">✏ Éditer le panneau</h3>
+
+        <!-- Image source -->
+        <label class="field-label">Source de l'image</label>
+        <div class="source-tabs">
+          <button class="tab-btn active" data-tab="generate">🤖 Générer</button>
+          <button class="tab-btn" data-tab="upload">📁 Importer</button>
+          <button class="tab-btn" data-tab="url">🔗 URL</button>
+        </div>
+
+        <!-- TAB: generate -->
+        <div class="tab-content active" id="tab-generate">
+          <label class="field-label">Prompt (description de l'image)</label>
+          <textarea id="panel-prompt" class="field-input" rows="4"
+            placeholder="Ex: Un héros manga debout sous la pluie, style encre noire, clair-obscur dramatique…"></textarea>
+          <label class="field-label">Style rapide</label>
+          <div class="style-chips" id="style-chips">
+            <span class="chip active" data-style="">Aucun</span>
+            <span class="chip" data-style="manga style, black and white ink">Manga N&amp;B</span>
+            <span class="chip" data-style="manhwa style, full color, vibrant">Manhwa couleur</span>
+            <span class="chip" data-style="comic book style, bold lines">Comics</span>
+            <span class="chip" data-style="watercolor illustration, soft colors">Aquarelle</span>
+            <span class="chip" data-style="pixel art, retro 16-bit">Pixel Art</span>
+          </div>
+          <label class="field-label">Modèle HF</label>
+          <select id="hf-model-select" class="field-input">
+            <option value="black-forest-labs/FLUX.1-schnell">FLUX.1-schnell (rapide)</option>
+            <option value="black-forest-labs/FLUX.1-dev">FLUX.1-dev (qualité)</option>
+            <option value="stabilityai/stable-diffusion-xl-base-1.0">SDXL 1.0</option>
+            <option value="runwayml/stable-diffusion-v1-5">SD 1.5 (léger)</option>
+          </select>
+          <button id="btn-generate" class="btn btn-primary btn-full">🎨 Générer l'image</button>
+          <div class="progress-bar hidden" id="gen-progress">
+            <div class="progress-fill" id="gen-fill"></div>
+            <span id="gen-status">Génération en cours…</span>
+          </div>
+        </div>
+
+        <!-- TAB: upload -->
+        <div class="tab-content hidden" id="tab-upload">
+          <div class="upload-zone" id="upload-zone">
+            <span>Glisser-déposer une image ici<br/>ou <u>cliquer pour parcourir</u></span>
+            <input type="file" id="upload-input" accept="image/*" hidden />
+          </div>
+        </div>
+
+        <!-- TAB: url -->
+        <div class="tab-content hidden" id="tab-url">
+          <label class="field-label">URL de l'image</label>
+          <input type="url" id="panel-image-url" class="field-input"
+            placeholder="https://example.com/image.png" />
+          <button id="btn-load-url" class="btn btn-primary btn-full">Charger</button>
+        </div>
+
+        <!-- Caption / dialogue -->
+        <hr class="divider" />
+        <label class="field-label">Texte / Dialogue</label>
+        <textarea id="panel-caption" class="field-input" rows="3"
+          placeholder="Dialogue ou légende du panneau…"></textarea>
+        <div class="caption-controls">
+          <label class="field-label inline">Position texte</label>
+          <select id="caption-position" class="field-input sm">
+            <option value="bottom">Bas</option>
+            <option value="top">Haut</option>
+            <option value="overlay">Superposé</option>
+            <option value="none">Aucun</option>
+          </select>
+        </div>
+
+        <!-- Layout -->
+        <hr class="divider" />
+        <label class="field-label">Taille du panneau</label>
+        <div class="size-grid">
+          <button class="size-btn active" data-size="full">Pleine largeur</button>
+          <button class="size-btn" data-size="half">Demi-largeur</button>
+          <button class="size-btn" data-size="third">Tiers</button>
+        </div>
+
+        <!-- Actions -->
+        <hr class="divider" />
+        <div class="panel-actions">
+          <button id="btn-duplicate-panel" class="btn btn-ghost btn-sm">⧉ Dupliquer</button>
+          <button id="btn-delete-panel"    class="btn btn-danger btn-sm">🗑 Supprimer</button>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- ════════════════════════════════════
+       SETTINGS MODAL
+  ════════════════════════════════════ -->
+  <div class="modal-overlay hidden" id="settings-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>⚙ Paramètres</h2>
+        <button class="modal-close" id="settings-close">✕</button>
+      </div>
+      <div class="modal-body">
+
+        <!-- Hugging Face -->
+        <section class="settings-section">
+          <h3>🤗 Hugging Face</h3>
+          <label class="field-label">Clé API Hugging Face</label>
+          <div class="api-key-row">
+            <input type="password" id="hf-api-key" class="field-input"
+              placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxxx" />
+            <button id="btn-toggle-hf-key" class="btn btn-ghost btn-sm">👁</button>
+          </div>
+          <p class="hint">Obtenez votre clé sur <a href="https://huggingface.co/settings/tokens"
+            target="_blank" rel="noopener">huggingface.co/settings/tokens</a></p>
+          <div id="hf-status" class="status-badge"></div>
+        </section>
+
+        <!-- Google Drive -->
+        <section class="settings-section">
+          <h3>📁 Google Drive</h3>
+          <label class="field-label">Google Client ID (OAuth2)</label>
+          <input type="text" id="google-client-id" class="field-input"
+            placeholder="xxxxxx.apps.googleusercontent.com" />
+          <p class="hint">Créez un identifiant OAuth 2.0 dans la <a
+            href="https://console.cloud.google.com/apis/credentials"
+            target="_blank" rel="noopener">Google Cloud Console</a>.</p>
+          <button id="btn-gdrive-auth" class="btn btn-primary">🔗 Connecter Google Drive</button>
+          <div id="gdrive-status" class="status-badge"></div>
+        </section>
+
+        <!-- Webtoon settings -->
+        <section class="settings-section">
+          <h3>📐 Mise en page</h3>
+          <label class="field-label">Largeur du webtoon (px)</label>
+          <input type="number" id="canvas-width" class="field-input" value="800" min="400" max="1600" step="50" />
+          <label class="field-label">Espacement entre panneaux (px)</label>
+          <input type="number" id="panel-gap" class="field-input" value="16" min="0" max="64" />
+          <label class="field-label">Couleur de fond</label>
+          <input type="color" id="bg-color" class="field-input color-input" value="#ffffff" />
+        </section>
+
+      </div>
+      <div class="modal-footer">
+        <button id="btn-settings-save" class="btn btn-primary">✔ Enregistrer</button>
+        <button id="btn-settings-cancel" class="btn btn-ghost">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════
+       EXPORT MODAL
+  ════════════════════════════════════ -->
+  <div class="modal-overlay hidden" id="export-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>⬇ Exporter</h2>
+        <button class="modal-close" id="export-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="export-options">
+          <button id="export-png" class="export-card">
+            <span class="export-icon">🖼</span>
+            <span>Image PNG<br/><small>Toutes les planches en PNG long</small></span>
+          </button>
+          <button id="export-pdf" class="export-card">
+            <span class="export-icon">📄</span>
+            <span>PDF<br/><small>Document paginé</small></span>
+          </button>
+          <button id="export-json" class="export-card">
+            <span class="export-icon">💾</span>
+            <span>Projet JSON<br/><small>Sauvegarde locale</small></span>
+          </button>
+          <button id="export-drive" class="export-card">
+            <span class="export-icon">☁</span>
+            <span>Google Drive<br/><small>Enregistrer sur Drive</small></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════
+       DRIVE PICKER MODAL
+  ════════════════════════════════════ -->
+  <div class="modal-overlay hidden" id="drive-picker-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>📂 Ouvrir depuis Google Drive</h2>
+        <button class="modal-close" id="drive-picker-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <ul id="drive-file-list" class="drive-file-list">
+          <!-- Populated dynamically -->
+        </ul>
+        <p id="drive-file-empty" class="muted hidden">Aucun projet trouvé sur Drive.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════
+       TOAST NOTIFICATIONS
+  ════════════════════════════════════ -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- ════════════════════════════════════
+       SCRIPTS
+  ════════════════════════════════════ -->
+  <script src="js/huggingface.js"></script>
+  <script src="js/gdrive.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
