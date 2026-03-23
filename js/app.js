@@ -84,10 +84,13 @@ const State = (() => {
       if (raw) Object.assign(_state.settings, JSON.parse(raw));
     } catch (_) { /* ignore */ }
 
-    // Apply config.js defaults for keys not yet saved in localStorage
+    // config.js values are always authoritative — they override anything in localStorage
     const cfg = window.APP_CONFIG || {};
-    if (!_state.settings.hfApiKey       && cfg.HF_API_KEY)       _state.settings.hfApiKey       = cfg.HF_API_KEY;
-    if (!_state.settings.googleClientId && cfg.GOOGLE_CLIENT_ID) _state.settings.googleClientId = cfg.GOOGLE_CLIENT_ID;
+    if (cfg.HF_API_KEY)       _state.settings.hfApiKey       = cfg.HF_API_KEY;
+    if (cfg.GOOGLE_CLIENT_ID) _state.settings.googleClientId = cfg.GOOGLE_CLIENT_ID;
+
+    // Persist immediately so the keys are available on the next visit
+    _persist();
   }
 
   return {
@@ -411,12 +414,36 @@ const GenerationQueue = (() => {
 ════════════════════════════════════════════════ */
 const SettingsUI = (() => {
   function open() {
-    const s = State.getSettings();
-    document.getElementById('hf-api-key').value        = s.hfApiKey       || '';
-    document.getElementById('google-client-id').value  = s.googleClientId || '';
-    document.getElementById('canvas-width').value      = s.canvasWidth    || 800;
-    document.getElementById('panel-gap').value         = s.panelGap       || 16;
-    document.getElementById('bg-color').value          = s.bgColor        || '#ffffff';
+    const s   = State.getSettings();
+    const cfg = window.APP_CONFIG || {};
+
+    // HF API key — hide inputs when pre-configured via config.js
+    const hfInputs        = document.getElementById('hf-api-key-inputs');
+    const hfPreconfigured = document.getElementById('hf-preconfigured');
+    if (cfg.HF_API_KEY) {
+      hfInputs.classList.add('hidden');
+      hfPreconfigured.classList.remove('hidden');
+    } else {
+      document.getElementById('hf-api-key').value = s.hfApiKey || '';
+      hfInputs.classList.remove('hidden');
+      hfPreconfigured.classList.add('hidden');
+    }
+
+    // Google Client ID — hide input when pre-configured via config.js
+    const googleInputs        = document.getElementById('google-client-id-inputs');
+    const googlePreconfigured = document.getElementById('google-preconfigured');
+    if (cfg.GOOGLE_CLIENT_ID) {
+      googleInputs.classList.add('hidden');
+      googlePreconfigured.classList.remove('hidden');
+    } else {
+      document.getElementById('google-client-id').value = s.googleClientId || '';
+      googleInputs.classList.remove('hidden');
+      googlePreconfigured.classList.add('hidden');
+    }
+
+    document.getElementById('canvas-width').value = s.canvasWidth || 800;
+    document.getElementById('panel-gap').value    = s.panelGap    || 16;
+    document.getElementById('bg-color').value     = s.bgColor     || '#ffffff';
     document.getElementById('settings-modal').classList.remove('hidden');
   }
 
@@ -425,8 +452,10 @@ const SettingsUI = (() => {
   }
 
   function save() {
-    const hfKey    = document.getElementById('hf-api-key').value.trim();
-    const clientId = document.getElementById('google-client-id').value.trim();
+    const cfg      = window.APP_CONFIG || {};
+    // Use config.js value when pre-configured; otherwise read from the form field
+    const hfKey    = cfg.HF_API_KEY    || document.getElementById('hf-api-key').value.trim();
+    const clientId = cfg.GOOGLE_CLIENT_ID || document.getElementById('google-client-id').value.trim();
     const width    = parseInt(document.getElementById('canvas-width').value) || 800;
     const gap      = parseInt(document.getElementById('panel-gap').value)    || 16;
     const bg       = document.getElementById('bg-color').value;
@@ -902,7 +931,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Google Drive auth
   document.getElementById('btn-gdrive-auth').addEventListener('click', async () => {
-    const clientId = document.getElementById('google-client-id').value.trim();
+    const cfg      = window.APP_CONFIG || {};
+    const clientId = cfg.GOOGLE_CLIENT_ID || document.getElementById('google-client-id').value.trim();
     if (!clientId) { Toast.show('Entrez d\'abord votre Google Client ID.', 'warning'); return; }
     GDrive.init(clientId);
     const statusEl = document.getElementById('gdrive-status');
