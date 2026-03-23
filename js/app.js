@@ -83,6 +83,11 @@ const State = (() => {
       const raw = localStorage.getItem('wm_settings');
       if (raw) Object.assign(_state.settings, JSON.parse(raw));
     } catch (_) { /* ignore */ }
+
+    // Apply config.js defaults for keys not yet saved in localStorage
+    const cfg = window.APP_CONFIG || {};
+    if (!_state.settings.hfApiKey       && cfg.HF_API_KEY)       _state.settings.hfApiKey       = cfg.HF_API_KEY;
+    if (!_state.settings.googleClientId && cfg.GOOGLE_CLIENT_ID) _state.settings.googleClientId = cfg.GOOGLE_CLIENT_ID;
   }
 
   return {
@@ -505,10 +510,14 @@ const DrivePickerModal = (() => {
 
 /* ════════════════════════════════════════════════
 const Exporter = (() => {
+  function _appName() {
+    return (window.APP_CONFIG || {}).APP_NAME || 'Webtoon Maker';
+  }
+
   function exportJSON() {
     const data = JSON.stringify(State.toJSON(), null, 2);
     const blob = new Blob([data], { type: 'application/json' });
-    _download(URL.createObjectURL(blob), `${State.get().title || 'webtoon'}.webtoon.json`);
+    _download(URL.createObjectURL(blob), `${State.get().title || _appName()}.webtoon.json`);
     Toast.show('Projet exporté en JSON.', 'success');
   }
 
@@ -537,7 +546,7 @@ const Exporter = (() => {
     try {
       const canvas = document.getElementById('webtoon-canvas');
       const c = await window.html2canvas(canvas, { useCORS: true, backgroundColor: State.getSettings().bgColor });
-      _download(c.toDataURL('image/png'), `${State.get().title || 'webtoon'}.png`);
+      _download(c.toDataURL('image/png'), `${State.get().title || _appName()}.png`);
       Toast.show('Export PNG terminé.', 'success');
     } catch (e) {
       Toast.show(`Export PNG échoué: ${e.message}`, 'error');
@@ -559,7 +568,7 @@ const Exporter = (() => {
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [c.width, c.height] });
       pdf.addImage(imgData, 'JPEG', 0, 0, c.width, c.height);
-      pdf.save(`${State.get().title || 'webtoon'}.pdf`);
+      pdf.save(`${State.get().title || _appName()}.pdf`);
       Toast.show('Export PDF terminé.', 'success');
     } catch (e) {
       Toast.show(`Export PDF échoué: ${e.message}`, 'error');
@@ -714,6 +723,12 @@ const DragDrop = (() => {
 ════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
   State.loadFromStorage();
+
+  // Apply app name from config.js
+  const appName = (window.APP_CONFIG || {}).APP_NAME || 'Webtoon Maker';
+  document.title = appName;
+  const brandEl = document.querySelector('.brand-title');
+  if (brandEl) brandEl.textContent = appName;
 
   // Init Drive if client ID saved
   const clientId = State.getSettings().googleClientId;
